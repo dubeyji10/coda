@@ -6,8 +6,11 @@ from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models.signals import pre_save, post_save
 from django.utils.translation import gettext_lazy as _
+from management.utils import unique_slug_generator
 from django_countries.fields import CountryField
+from management.models import Department
 
 
 # Create your models here.
@@ -60,42 +63,63 @@ class CustomerUser(AbstractUser):
     class Meta:
         ordering = ["-date_joined"]
 
+# =========================CREDENTIALS TABLE======================================
+class CredentialCategory(models.Model):
+    department = models.ForeignKey(Department,on_delete=models.RESTRICT,default="Other")
+    # created_by= models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.CharField(
+        verbose_name=_('Category Name'),
+        help_text=_('Required'),
+        max_length=255, 
+        unique=True,
+    )
+    slug = models.SlugField(verbose_name=_('category safe URL'), max_length=255, unique=True)
+    description = models.TextField(max_length=1000, default=None)
+    entry_date = models.DateTimeField(_('entered on'),auto_now_add=True, editable=True)
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=True)
 
-""" 
-#Applicant Table
-class applicant(models.Model):
-    applicant = models.ForeignKey('accounts.CustomerUser', on_delete=models.CASCADE)
-    #applicant = models.OneToOneField('accounts.CustomerUser', on_delete=models.CASCADE)
-    resume=models.FileField(upload_to='resumes/doc/',blank=True,null=True)
-    uploaded = models.BooleanField('uploaded', default=True)
-"""
-
-
-"""
-class Profile(models.Model):
-    user = models.OneToOneField('accounts.CustomerUser', on_delete=models.CASCADE)
-    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
-
-    def __str__(self):
-        return f'{self.user.username} Profile'
-
-    #def save(self, *args, **kwargs):
-       # super().save(*args, **kwargs)
-
-        # img=image.open(self.image.path)
-
-        # if img.height> 300 or img.width>300:
-          #   output_size=(300,300)
-           #  img.thumbnail(output_size)
-           #  img.save(self.image.path)
-
-class UserProfile(models.Model):
-    user = models.OneToOneField('CustomerUser', on_delete=models.CASCADE)
-    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+    def get_absolute_url(self):
+        return reverse('management:credentialcategorylist', args=[self.slug])
+    class Meta:
+        verbose_name=_('Category')
+        verbose_name_plural=_('Categories')
 
     def __str__(self):
-        return f'{self.user.username} Profile'
-"""
+        return f"{self.category} Categories"
+
+class Credential(models.Model):
+    category = models.ManyToManyField(CredentialCategory, blank=True,related_name='credentialcategory')
+    added_by= models.ForeignKey(CustomerUser, on_delete=models.RESTRICT)
+    name = models.CharField(
+        verbose_name=_('credential Name'),
+        help_text=_('Required'),
+        max_length=255, 
+    )
+    slug = models.SlugField(verbose_name=_('credential safe URL'), max_length=255, unique=True)
+    description = models.TextField(max_length=1000, default=None)
+    link_name=models.CharField(max_length=255, default='General')
+    link=models.CharField(max_length=100,blank=True, null=True)
+    password=models.CharField(max_length=255,blank=True, null=True, default='No Password Needed')
+    entry_date = models.DateTimeField(_('entered on'),auto_now_add=True, editable=True)
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=True)
+    class Meta:
+        verbose_name_plural = "credentials"
+
+    def get_absolute_url(self):
+        return reverse("management:credential")
+
+    def __str__(self):
+        return self.name
+
+# ========================================SLUGS GENERATOR====================================================
+def credentialcategory_pre_save_receiver(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = unique_slug_generator(instance)
+
+pre_save.connect(credentialcategory_pre_save_receiver, sender=CredentialCategory)
+
 # ========================================TIME TRACKER====================================================
 # Time Tracking Model
 class Tracker(models.Model):

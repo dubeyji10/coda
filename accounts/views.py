@@ -12,15 +12,20 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from .decorators import unauthenticated_user
 from django.db.models.aggregates import Avg, Sum
-from .forms import UserForm,LoginForm # , TimeForm  , SignUpForm, UserLoginForm, UserRegisterForm
+from .forms import (
+                    UserForm,LoginForm,
+                    CredentialCategoryForm,
+                    CredentialForm
+)
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404, redirect,render
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
-from .models import CustomerUser,Tracker
+from .models import CustomerUser,Tracker,CredentialCategory,Credential
 from django.db.models import Q
-from management.models import Task
+from management.models import Task, Department
+from management.views import  department
 from application.models import Applicant_Profile
 from finance.models import Default_Payment_Fees
 from django.http import QueryDict
@@ -256,6 +261,39 @@ def reset_password(email, from_email, template='registration/password_reset_emai
     #form = PasswordResetForm({'email':'sample@sample.com'})
     return form.save(from_email=from_email, email_template_name=template)
 ''' 
+#================================CREDENTIALS SECTION================================
+
+def newcredentialCategory(request):
+    if request.method == "POST":
+        form = CredentialCategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('accounts:account-crendentials')
+    else:
+        form=CredentialCategoryForm()
+    return render(request, "accounts/admin/forms/credentialCategory_form.html", {"form":form})
+    
+def newcredential(request):
+    if request.method == "POST":
+        form = CredentialForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('accounts:account-crendentials')
+    else:
+        form=CredentialForm()
+    return render(request, "accounts/admin/forms/credential_form.html", {"form":form})
+
+def credential_view(request):
+    categories=CredentialCategory.objects.all().order_by('-entry_date')
+    credentials=Credential.objects.all().order_by('-entry_date')
+    departments=department(request)
+    context={
+                "departments":departments,
+                "categories":categories,
+                "credentials":credentials
+            }
+    return render(request, 'accounts/admin/credentials.html', context)
+
 #================================EMPLOYEE SECTION================================
 def Employeelist(request):
     employees=CustomerUser.objects.filter(Q(category = 2)|Q(is_employee=True)).order_by('-date_joined')

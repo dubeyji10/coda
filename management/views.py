@@ -11,6 +11,7 @@ from django.urls import reverse
 
 from management.utils import email_template
 from .forms import (
+    DepartmentForm,
     TransactionForm,
     OutflowForm,
     InflowForm,
@@ -36,6 +37,7 @@ from .models import (
     TaskHistory,
     TaskLinks,
     Requirement,
+    Department
 )
 from data.models import DSU
 
@@ -52,17 +54,29 @@ def home(request):
         request, "main/home_templates/management_home.html", {"title": "home"}
     )
 
+def department(request):
+    departments=Department.objects.all()
+    return render(request, "management/doc_templates/departmentlist.html" , {'departments':departments})
 
-def contract(request):
-    return render(request, "management/doc_templates/trainingcontract_form.html")
-    # if request.user == employee:
-    #     # return render(request, 'management/daf/paystub.html', context)
-    #     return render(request, "management/doc_templates/studentcontract_form.html")
-    # elif request.user.is_superuser:
-    #     # return render(request, 'management/daf/paystub.html', context)
-    #     return render(request, "management/doc_templates/supportcontract_form.html")
+def newdepartment(request):
+    if request.method == "POST":
+        form = DepartmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('management:management-department')
+    else:
+        form=DepartmentForm()
+    return render(request, "management/doc_templates/department_form.html", {"form":form})
     
-
+def transact(request):
+    if request.method == "POST":
+        form = TransactionForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect("/management/transaction/")
+    else:
+        form = TransactionForm()
+    return render(request, "management/company_finances/transact.html", {"form": form})
 # ==============================PLACE HOLDER MODELS=======================================
 
 # Summary information for tasks
@@ -972,6 +986,13 @@ def requirements(request):
         {"requirements": requirements},
     )
 
+def requirements_view(request):
+    requirements = Requirement.objects.all().order_by("-created_by")
+    return render(
+        request,
+        "management/doc_templates/requirementlist.html",
+        {"requirements": requirements},
+    )
 
 def newrequirement(request):
     if request.method == "POST":

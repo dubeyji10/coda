@@ -14,9 +14,62 @@ from .utils import unique_slug_generator
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-# User=settings.AUTH_USER_MODEL
-User = get_user_model()
+User=settings.AUTH_USER_MODEL
+# User = get_user_model()
 # --------------------------------------
+# ================DEPARTMENTS================================
+
+class Department(models.Model):
+    """Department Table will provide a list of the different departments in CODA"""
+    # Department
+    HR = "HR Department"
+    IT = "IT Department"
+    MKT = "Marketing Department"
+    FIN = "Finance Department"
+    SECURITY = "Security Department"
+    MANAGEMENT = "Management Department"
+    HEALTH = "Health Department"
+    Other = "Other"
+    DEPARTMENT_CHOICES = [
+        (HR, "HR Department"),
+        (IT, "IT Department"),
+        (MKT, "Marketing Department"),
+        (FIN, "Finance Department"),
+        (SECURITY, "Security Department"),
+        (MANAGEMENT, "Management Department"),
+        (HEALTH, "Health Department"),
+        (Other, "Other"),
+    ]
+    name = models.CharField(
+        choices=DEPARTMENT_CHOICES,
+        verbose_name=_('Department Name'),
+        help_text=_('Required'),
+        max_length=255, 
+        unique=True,
+        default=Other,
+    )
+    slug = models.SlugField(verbose_name=_('Department safe URL'), max_length=255, unique=True)
+    description = models.TextField(max_length=1000, default=None)
+    entry_date = models.DateTimeField(_('entered on'),auto_now_add=True, editable=True)
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=True)
+
+    def get_absolute_url(self):
+        return reverse('management:department_list', args=[self.slug])
+
+    class Meta:
+        verbose_name=_('Department')
+        verbose_name_plural=_('Departments')
+
+    def __str__(self):
+        return f"{self.name} Departments"
+
+def department_pre_save_receiver(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = unique_slug_generator(instance)
+
+pre_save.connect(department_pre_save_receiver, sender=Department)
+
 class Transaction(models.Model):
     # Method of Payment
     Cash = "Cash"

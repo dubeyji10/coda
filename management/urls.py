@@ -46,7 +46,8 @@ urlpatterns = [
     #-----------COMPANY REPORTS---------------------------------------
     path('finance/', views.finance, name='finance'),
     path('hr/', views.hr, name='hr'),
-    #path('other/', views.transact, name='management-transact'), 
+    path('department/', views.department, name='management-department'), 
+    path('newdepartment/', views.newdepartment, name='management-newdepartment'), 
 
     #-----------COMPANY POLICIES---------------------------------------
     path('policy/', views.policy, name='policy'),
@@ -76,13 +77,14 @@ urlpatterns = [
     path('gettotalduration/', views.gettotalduration, name='gettotalduration'),
     path('task/<int:pk>/delete/', TaskDeleteView.as_view(), name='deletetask'),
     path('newcategory/', TagCreateView.as_view(), name='newcategory'),
-    path('contract/',views.contract, name='contract'),
+    # path('contract/',views.contract, name='contract'),
 
     path('assess/', views.assess, name='assess'),
     path('assessment/', AssessListView.as_view(), name='assessment'),
 
     path('requirement/new', views.newrequirement, name='new_requirement'),
     path('requirements/', views.requirements, name='requirements'),
+    path('developertime/', views.requirements_view, name='requirement_time'),
     path('activerequirements/', views.active_requirements, name='requirements-active'),
     path('requirement/<int:pk>/update/', RequirementUpdateView.as_view(template_name='management/doc_templates/requirement_form.html'), name='requirement-update'),
     path('requirement/<int:pk>/delete/', RequirementDeleteView.as_view(), name='requirement-delete'),
