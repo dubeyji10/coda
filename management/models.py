@@ -621,6 +621,13 @@ class Task(models.Model):
 
     objects = TaskManager()
 
+    @classmethod
+    def get_default_pk(cls):
+        tak, created = cls.objects.get_or_create(
+            title="Other", defaults=dict(description="this is not an task")
+        )
+        return tak.pk
+
     @property
     def submitted(self):
         submitted = datetime.date(self.submission)
@@ -675,19 +682,14 @@ class Task(models.Model):
 
 # Adding the evidence table/model
 class TaskLinks(models.Model):
-    task = models.ManyToManyField(Task, blank=True,
-    related_name='task_featured')
-    added_by= models.ForeignKey(
-    User, 
-    on_delete=models.CASCADE,
-    limit_choices_to=Q(is_employee=True)|Q(is_admin=True) | Q(is_superuser=True),
-    )
-    link_name=models.CharField(max_length=255, default='General')
+    # task = models.ManyToManyField(Task, blank=True,related_name='task_featured')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE,related_name='task_featured',default=Task.get_default_pk)
     description=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     doc=models.FileField(default="None",upload_to='evidence/docs/')
-    link=models.CharField(max_length=255,blank=True, null=True)
+    link_name=models.CharField(max_length=255,blank=True, null=True)
+    link=models.CharField(max_length=1000,blank=True, null=True)
     linkpassword=models.CharField(max_length=255, default='No Password Needed')
     is_active = models.BooleanField("Is active", default=True)
     is_featured = models.BooleanField("Is featured", default=False)
@@ -997,3 +999,4 @@ class Facebook(models.Model):
 #          editable=True,
 #          null=True
 #          )
+# ==================================ACTIVITIES====================================
