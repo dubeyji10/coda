@@ -249,6 +249,7 @@ class EvidenceForm(forms.ModelForm):
                     "description",
                     "doc",
                     "link",
+                    "linkpassword",
                     "is_active",
                     "is_featured",
         ]
@@ -260,6 +261,7 @@ class EvidenceForm(forms.ModelForm):
                 "description":"Describe the link/Evidence",
                 "doc":"Upload file/document if possible",
                 "link":"Upload link/paste your link below",
+                "linkpassword":"Provide Password if necessary",
                 # "is_active ":"Is this link still active "
         }
         #  If you have to exclude some features you put them here
