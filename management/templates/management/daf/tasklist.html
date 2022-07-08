@@ -2,6 +2,20 @@
 <section id="career">
   <div class="data_training text-center">
     <h3 class="title">DAF ACTIVITIES</h3>
+    {% if user.is_admin or user.is_superuser %}
+    <div class="row">
+      <div class="col-md-6">
+        <p><a href="{% url 'management:newcategory'%}" class="btn btn-primary btn-sm"
+          >ADD CATEGORY
+        </a></p>
+      </div>
+      <div class="col-md-6">
+        <p><a href="{% url 'management:newtask'%}" class="btn btn-primary btn-sm"
+          >ADD TASK
+        </a></p>
+      </div>
+    </div>
+    {% endif %}
     <p class="p text-center">Click on your name to access your monthly tasks <b>{{num_tasks}}</b> activities this month</p>
   <div class="container-fluid mr-auto">
         <div class="row text-center">
