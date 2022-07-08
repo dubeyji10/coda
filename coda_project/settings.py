@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "django_filters",
     "django_celery_beat",
     "django_celery_results",
+    "finance",
     #'dbbackup',
 ]
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

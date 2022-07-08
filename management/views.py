@@ -43,6 +43,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from accounts.models import Tracker
 
+from finance.utils import calculate_loan
+
 # User=settings.AUTH_USER_MODEL
 User = get_user_model()
 
@@ -688,6 +690,11 @@ def payslip(request, user=None, *args, **kwargs):
     # the loan amount and add to the deductions. We need to create
     # new database table to store the loan amount and add to the database.
     loan = Decimal(total_pay) * Decimal("0.2")
+    training_loan = calculate_loan(employee)
+    if training_loan > loan:
+        loan = Decimal(total_pay) * Decimal("0.2")
+    else:
+        loan = training_loan
     # if employee use company computer, add the charge to the deductions.
     computer_maintenance = 500
     # if user self paid the food accomodation, no need to add to the deductions

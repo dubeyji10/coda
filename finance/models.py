@@ -2,6 +2,9 @@ from django.db import models
 from accounts.models import CustomerUser
 from django.utils import timezone
 
+from django.contrib.auth import get_user_model
+
+
 # Create your models here.
 
 
@@ -48,3 +51,17 @@ class Default_Payment_Fees(models.Model):
 	job_plan_hours_per_month = models.IntegerField(default=40)
 	student_down_payment_per_month = models.IntegerField(default=500)
 	student_bonus_payment_per_month = models.IntegerField(default=250)
+
+
+class TrainingLoan(models.Model):
+    DEBIT = "Debit"
+    CREDIT = "Credit"
+    LOAN_CHOICES = [
+        (DEBIT, "Debit"),
+        (CREDIT, "Credit"),
+    ]
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    category = models.CharField(max_length=25, choices=LOAN_CHOICES,)
+    value = models.BigIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

@@ -716,6 +716,7 @@ class TaskHistory(models.Model):
     created_at = models.DateTimeField(
         help_text=_("Date formart :mm/dd/yyyy"), auto_now=True, editable=True, null=True
     )
+    date = models.DateField(default=datetime.today())
     objects = TaskManager()
 
     @property
